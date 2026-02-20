@@ -1,13 +1,31 @@
+import os
+
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+TEST_API_KEY = "test-api-key-for-testing"
+
+
+@pytest.fixture(autouse=True)
+def set_api_key_env():
+    """Set API_KEY env var for all tests."""
+    os.environ["API_KEY"] = TEST_API_KEY
+    yield
+    os.environ.pop("API_KEY", None)
 
 
 @pytest.fixture
 def client():
     """FastAPI test client."""
+    from main import app
+
     return TestClient(app)
+
+
+@pytest.fixture
+def auth_header():
+    """Auth header with valid API key."""
+    return {"X-API-Key": TEST_API_KEY}
 
 
 @pytest.fixture

@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
-import sys
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -25,21 +23,30 @@ BaseUrlOption = Annotated[
 ]
 ApiKeyOption = Annotated[
     Optional[str],
-    typer.Option("--api-key", envvar="PORTFOLIO_API_KEY", help="API key for authentication."),
+    typer.Option(
+        "--api-key", envvar="PORTFOLIO_API_KEY", help="API key for authentication."
+    ),
 ]
 FileOption = Annotated[
     Optional[Path],
-    typer.Option("--file", "-f", help="Path to a JSON file containing the portfolio request payload."),
+    typer.Option(
+        "--file",
+        "-f",
+        help="Path to a JSON file containing the portfolio request payload.",
+    ),
 ]
 DataOption = Annotated[
     Optional[str],
-    typer.Option("--data", "-d", help="Inline JSON string with the portfolio request payload."),
+    typer.Option(
+        "--data", "-d", help="Inline JSON string with the portfolio request payload."
+    ),
 ]
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _load_payload(file: Optional[Path], data: Optional[str]) -> dict:
     """Resolve --file (priority) or --data into a dict."""
@@ -98,6 +105,7 @@ def _print_result(result: dict) -> None:
 # Commands
 # ---------------------------------------------------------------------------
 
+
 @app.command()
 def health(
     base_url: BaseUrlOption = "http://localhost:8000",
@@ -112,7 +120,9 @@ def health(
             typer.echo(f"Status : {data['status']}")
             typer.echo(f"Version: {data['version']}")
         except httpx.HTTPStatusError as exc:
-            typer.echo(f"API error {exc.response.status_code}: {exc.response.text}", err=True)
+            typer.echo(
+                f"API error {exc.response.status_code}: {exc.response.text}", err=True
+            )
             raise typer.Exit(1)
         except httpx.RequestError as exc:
             typer.echo(f"Connection error: {exc}", err=True)
@@ -153,7 +163,9 @@ def efficient_return(
     data: DataOption = None,
     target_return: Annotated[
         Optional[float],
-        typer.Option("--target-return", help="Target annual return (overrides value in payload)."),
+        typer.Option(
+            "--target-return", help="Target annual return (overrides value in payload)."
+        ),
     ] = None,
     base_url: BaseUrlOption = "http://localhost:8000",
     api_key: ApiKeyOption = None,
@@ -163,7 +175,10 @@ def efficient_return(
     if target_return is not None:
         payload["target_return"] = target_return
     if "target_return" not in payload or payload["target_return"] is None:
-        typer.echo("Error: target_return is required (use --target-return or include it in the payload).", err=True)
+        typer.echo(
+            "Error: target_return is required (use --target-return or include it in the payload).",
+            err=True,
+        )
         raise typer.Exit(1)
     with _build_client(base_url, api_key) as client:
         result = _post(client, "/api/v1/optimize/efficient-return", payload)
@@ -176,7 +191,10 @@ def efficient_risk(
     data: DataOption = None,
     target_volatility: Annotated[
         Optional[float],
-        typer.Option("--target-volatility", help="Target annual volatility (overrides value in payload)."),
+        typer.Option(
+            "--target-volatility",
+            help="Target annual volatility (overrides value in payload).",
+        ),
     ] = None,
     base_url: BaseUrlOption = "http://localhost:8000",
     api_key: ApiKeyOption = None,
@@ -186,7 +204,10 @@ def efficient_risk(
     if target_volatility is not None:
         payload["target_volatility"] = target_volatility
     if "target_volatility" not in payload or payload["target_volatility"] is None:
-        typer.echo("Error: target_volatility is required (use --target-volatility or include it in the payload).", err=True)
+        typer.echo(
+            "Error: target_volatility is required (use --target-volatility or include it in the payload).",
+            err=True,
+        )
         raise typer.Exit(1)
     with _build_client(base_url, api_key) as client:
         result = _post(client, "/api/v1/optimize/efficient-risk", payload)

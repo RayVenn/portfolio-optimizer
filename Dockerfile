@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Install C build tools needed to compile ecos (required by pyportfolioopt)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install dependencies first (layer caching)

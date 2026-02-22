@@ -8,7 +8,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 # Copy application code and install project
-COPY main.py ./
+COPY main.py cli.py ./
 COPY app/ ./app/
 RUN uv sync --frozen --no-dev
 

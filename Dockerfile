@@ -1,49 +1,42 @@
-# ===== Stage 1: Builder =====
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+# ── Stage 1: build dependencies ───────────────────────────────────────────────
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Install C build tools needed to compile ecos (required by pyportfolioopt)
+# librdkafka-dev is required to compile confluent-kafka's C extension
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+    librdkafka-dev \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies first (layer caching)
-COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-install-project
+COPY pyproject.toml ./
+RUN uv sync --no-dev
 
-# Copy application code and install project
-COPY main.py cli.py ./
-COPY app/ ./app/
-RUN uv sync --frozen --no-dev
-
-# ===== Stage 2: Runtime =====
-FROM python:3.13-slim-bookworm AS runtime
+# ── Stage 2: minimal runtime image ────────────────────────────────────────────
+FROM python:3.12-slim-bookworm AS runtime
 
 WORKDIR /app
 
-# Create non-root user
-RUN groupadd --gid 1000 appuser && \
-    useradd --uid 1000 --gid 1000 --no-create-home appuser
+# librdkafka1 is the runtime shared library for confluent-kafka
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    librdkafka1 \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the virtual environment from builder
+# Non-root user
+RUN groupadd --gid 1000 appuser && useradd --uid 1000 --gid 1000 --no-create-home appuser
+
 COPY --from=builder /app/.venv /app/.venv
+COPY producer/ /app/producer/
 
-# Copy application code
-COPY main.py ./
-COPY app/ ./app/
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
-# Use the venv Python
-ENV PATH="/app/.venv/bin:$PATH"
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
-
-# Switch to non-root
 USER appuser
 
-EXPOSE 8000
+EXPOSE 8080
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health')" || exit 1
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["python", "-m", "producer.main"]

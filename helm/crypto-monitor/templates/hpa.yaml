@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "portfolio-optimizer.fullname" . }}
+  name: {{ include "crypto-monitor.fullname" . }}
   labels:
-    {{- include "portfolio-optimizer.labels" . | nindent 4 }}
+    {{- include "crypto-monitor.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "portfolio-optimizer.fullname" . }}
+    name: {{ include "crypto-monitor.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

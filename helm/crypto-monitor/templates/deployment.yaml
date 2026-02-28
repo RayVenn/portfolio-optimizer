@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "portfolio-optimizer.fullname" . }}
+  name: {{ include "crypto-monitor.fullname" . }}
   labels:
-    {{- include "portfolio-optimizer.labels" . | nindent 4 }}
+    {{- include "crypto-monitor.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "portfolio-optimizer.selectorLabels" . | nindent 6 }}
+      {{- include "crypto-monitor.selectorLabels" . | nindent 6 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -19,9 +19,9 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "portfolio-optimizer.selectorLabels" . | nindent 8 }}
+        {{- include "crypto-monitor.selectorLabels" . | nindent 8 }}
     spec:
-      serviceAccountName: {{ include "portfolio-optimizer.serviceAccountName" . }}
+      serviceAccountName: {{ include "crypto-monitor.serviceAccountName" . }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
@@ -35,9 +35,9 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
-          env:
-            - name: API_KEY
-              {{- toYaml .Values.env.API_KEY | nindent 14 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "crypto-monitor.fullname" . }}-config
           livenessProbe:
             httpGet:
               path: {{ .Values.probes.liveness.path }}

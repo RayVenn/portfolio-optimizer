@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: portfolio-optimizer
+  name: crypto-monitor
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -11,11 +11,11 @@ spec:
   source:
     repoURL: https://github.com/RayVenn/portfolio-optimizer.git
     targetRevision: main
-    path: helm/portfolio-optimizer
+    path: helm/crypto-monitor
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: portfolio-optimizer
+    namespace: crypto-monitor
 
   syncPolicy:
     automated:

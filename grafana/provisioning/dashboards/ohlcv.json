@@ -38,36 +38,71 @@
       "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
       "fieldConfig": {
         "defaults": {
-          "color": {"mode": "fixed", "fixedColor": "purple"},
-          "custom": {"fillOpacity": 80, "lineWidth": 1},
-          "unit": "short"
+          "color": {"mode": "fixed", "fixedColor": "yellow"},
+          "custom": {"lineWidth": 2, "fillOpacity": 0},
+          "unit": "currencyUSD"
         },
         "overrides": []
       },
       "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14},
       "id": 2,
       "options": {
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": false},
+        "tooltip": {"mode": "single", "sort": "none"}
+      },
+      "targets": [
+        {
+          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+          "rawSql": "SELECT window_start AS time, vwap FROM binance.ohlcv WHERE source = 'ALL' AND $__timeFilter(window_start) ORDER BY window_start",
+          "refId": "A",
+          "format": 1
+        }
+      ],
+      "title": "VWAP (All Exchanges)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+      "fieldConfig": {
+        "defaults": {
+          "custom": {"fillOpacity": 80, "lineWidth": 1},
+          "unit": "short"
+        },
+        "overrides": [
+          {
+            "matcher": {"id": "byName", "options": "buy_volume"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]
+          },
+          {
+            "matcher": {"id": "byName", "options": "sell_volume"},
+            "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]
+          }
+        ]
+      },
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 22},
+      "id": 3,
+      "options": {
         "barRadius": 0,
         "barWidth": 0.6,
         "fullHighlight": false,
         "groupWidth": 0.7,
-        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": false},
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true},
         "orientation": "auto",
         "showValue": "never",
-        "stacking": "none",
-        "tooltip": {"mode": "single", "sort": "none"},
+        "stacking": "normal",
+        "tooltip": {"mode": "multi", "sort": "none"},
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 100
       },
       "targets": [
         {
           "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-          "rawSql": "SELECT window_start AS time, volume FROM binance.ohlcv WHERE source = 'ALL' AND $__timeFilter(window_start) ORDER BY window_start",
+          "rawSql": "SELECT window_start AS time, buy_volume, sell_volume FROM binance.ohlcv WHERE source = 'ALL' AND $__timeFilter(window_start) ORDER BY window_start",
           "refId": "A",
           "format": 1
         }
       ],
-      "title": "BTC Volume (All Exchanges)",
+      "title": "Buy vs Sell Volume",
       "type": "barchart"
     }
   ],
@@ -80,5 +115,5 @@
   "timezone": "utc",
   "title": "BTC 1-Minute OHLCV",
   "uid": "btcusdt-ohlcv-1m",
-  "version": 8
+  "version": 9
 }

@@ -29,8 +29,11 @@ public class OhlcvAggregator
             acc.high = Math.max(acc.high, trade.price);
             acc.low  = Math.min(acc.low,  trade.price);
         }
-        acc.close  = trade.price;
-        acc.volume += trade.quantity;
+        acc.close          = trade.price;
+        acc.volume         += trade.quantity;
+        acc.priceVolumeSum += trade.price * trade.quantity;
+        if (trade.isBuyerMaker) acc.sellVolume += trade.quantity;
+        else                    acc.buyVolume  += trade.quantity;
         acc.count++;
         return acc;
     }
@@ -43,6 +46,9 @@ public class OhlcvAggregator
         bar.low        = acc.low;
         bar.close      = acc.close;
         bar.volume     = acc.volume;
+        bar.vwap       = acc.volume > 0 ? acc.priceVolumeSum / acc.volume : acc.close;
+        bar.buyVolume  = acc.buyVolume;
+        bar.sellVolume = acc.sellVolume;
         bar.tradeCount = acc.count;
         // symbol and window timestamps are set by OhlcvWindowFunction
         return bar;
@@ -57,9 +63,12 @@ public class OhlcvAggregator
         merged.high        = Math.max(a.high, b.high);
         merged.low         = Math.min(a.low,  b.low);
         merged.close       = b.close;   // b is the later window segment
-        merged.volume      = a.volume + b.volume;
-        merged.count       = a.count   + b.count;
-        merged.initialized = true;
+        merged.volume         = a.volume + b.volume;
+        merged.priceVolumeSum = a.priceVolumeSum + b.priceVolumeSum;
+        merged.buyVolume      = a.buyVolume  + b.buyVolume;
+        merged.sellVolume     = a.sellVolume + b.sellVolume;
+        merged.count          = a.count + b.count;
+        merged.initialized    = true;
         return merged;
     }
 }

@@ -29,6 +29,7 @@ public class CoinbaseWebSocketClient extends WebSocketClient {
     private       double                   currentDelay;
     private volatile boolean               closed    = false;
 
+
     public CoinbaseWebSocketClient(Config config,
                                    Consumer<Trade> onTrade,
                                    Consumer<String> onRawError) {

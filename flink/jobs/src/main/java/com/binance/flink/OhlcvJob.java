@@ -86,8 +86,8 @@ public class OhlcvJob {
 
         // ── Sink 1: ClickHouse via JDBC ───────────────────────────────────────
         ohlcv.addSink(JdbcSink.sink(
-                "INSERT INTO ohlcv (symbol, source, window_start, open, high, low, close, volume, trade_count) "
-                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO ohlcv (symbol, source, window_start, open, high, low, close, volume, vwap, buy_volume, sell_volume, trade_count) "
+                        + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (ps, bar) -> {
                     ps.setString(1, bar.symbol);
                     ps.setString(2, bar.source);
@@ -97,7 +97,10 @@ public class OhlcvJob {
                     ps.setDouble(6, bar.low);
                     ps.setDouble(7, bar.close);
                     ps.setDouble(8, bar.volume);
-                    ps.setInt(9, bar.tradeCount);
+                    ps.setDouble(9, bar.vwap);
+                    ps.setDouble(10, bar.buyVolume);
+                    ps.setDouble(11, bar.sellVolume);
+                    ps.setInt(12, bar.tradeCount);
                 },
                 JdbcExecutionOptions.builder()
                         .withBatchSize(100)

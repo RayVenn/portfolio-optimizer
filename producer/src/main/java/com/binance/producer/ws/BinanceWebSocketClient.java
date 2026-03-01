@@ -22,12 +22,13 @@ public class BinanceWebSocketClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(BinanceWebSocketClient.class);
 
     private final Config                    config;
-    private final Consumer<Trade>    onTrade;
+    private final Consumer<Trade>           onTrade;
     private final Consumer<String>          onRawError;
-    private final ObjectMapper              mapper   = new ObjectMapper();
+    private final ObjectMapper              mapper    = new ObjectMapper();
     private final ScheduledExecutorService  scheduler = Executors.newSingleThreadScheduledExecutor();
     private       double                    currentDelay;
-    private volatile boolean                closed   = false;
+    private volatile boolean                closed    = false;
+
 
     public BinanceWebSocketClient(Config config,
                                   Consumer<Trade> onTrade,

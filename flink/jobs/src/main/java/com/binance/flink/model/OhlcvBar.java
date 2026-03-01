@@ -11,5 +11,8 @@ public class OhlcvBar implements Serializable {
     public long   windowStartMs;
     public long   windowEndMs;
     public double open, high, low, close, volume;
+    public double vwap;
+    public double buyVolume;
+    public double sellVolume;
     public int    tradeCount;
 }

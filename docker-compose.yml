@@ -120,6 +120,25 @@ services:
       timeout: 5s
       retries: 10
 
+  # ── Load generator (docker compose --profile load up -d) ──────────────────
+  # Pumps synthetic trades into crypto-trades at LOAD_TRADES_PER_SECOND rate.
+  # Symbols: BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT (random walk price simulation).
+
+  load-generator:
+    build:
+      context: .
+      dockerfile: load-generator/Dockerfile
+    profiles: [load]
+    depends_on:
+      kafka-setup:
+        condition: service_completed_successfully
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_TOPIC: crypto-trades
+      LOAD_SYMBOLS: BTCUSDT,ETHUSDT,SOLUSDT,BNBUSDT
+      LOAD_TRADES_PER_SECOND: "10000"
+    restart: unless-stopped
+
   # ── Monitoring (docker compose --profile monitoring up -d) ─────────────────
 
   grafana:

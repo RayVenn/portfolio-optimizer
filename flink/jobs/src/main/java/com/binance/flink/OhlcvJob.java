@@ -47,8 +47,8 @@ public class OhlcvJob {
                 "KAFKA_BOOTSTRAP_SERVERS", "kafka:29092");
         String kafkaTopic = System.getenv().getOrDefault(
                 "KAFKA_TOPIC", "crypto-trades");
-        String clickhouseUrl = System.getenv().getOrDefault(
-                "CLICKHOUSE_URL", "jdbc:clickhouse://clickhouse:8123/binance");
+        String timescaledbUrl = System.getenv().getOrDefault(
+                "TIMESCALEDB_URL", "jdbc:postgresql://timescaledb:5432/binance");
 
         // ── Source ────────────────────────────────────────────────────────────
         KafkaSource<String> kafkaSource = KafkaSource.<String>builder()
@@ -88,7 +88,7 @@ public class OhlcvJob {
                 .keyBy(bar -> bar.symbol + "~" + bar.source)
                 .process(new EmaFunction());
 
-        // ── Sink 1: ClickHouse via JDBC ───────────────────────────────────────
+        // ── Sink 1: TimescaleDB via JDBC ──────────────────────────────────────
         ohlcv.addSink(JdbcSink.sink(
                 "INSERT INTO ohlcv (symbol, source, window_start, open, high, low, close, volume, vwap, buy_volume, sell_volume, ema10, trade_count) "
                         + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -113,10 +113,10 @@ public class OhlcvJob {
                         .withMaxRetries(5)
                         .build(),
                 new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                        .withUrl(clickhouseUrl)
-                        .withDriverName("com.clickhouse.jdbc.ClickHouseDriver")
-                        .withUsername("default")
-                        .withPassword("")
+                        .withUrl(timescaledbUrl)
+                        .withDriverName("org.postgresql.Driver")
+                        .withUsername("postgres")
+                        .withPassword("password")
                         .build()
         ));
 

@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "TimescaleDB (binance)",
+      "Group": "Servers",
+      "Host": "timescaledb",
+      "Port": 5432,
+      "MaintenanceDB": "binance",
+      "Username": "postgres",
+      "SSLMode": "disable",
+      "PassFile": "/pgpass"
+    }
+  }
+}

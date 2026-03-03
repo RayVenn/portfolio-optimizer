@@ -7,7 +7,7 @@
   "links": [],
   "panels": [
     {
-      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+      "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
       "fieldConfig": {
         "defaults": {"custom": {"lineWidth": 1, "fillOpacity": 10}},
         "overrides": []
@@ -25,17 +25,17 @@
       },
       "targets": [
         {
-          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-          "rawSql": "SELECT window_start AS time, open, high, low, close FROM binance.ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
+          "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
+          "rawSql": "SELECT window_start AS time, open, high, low, close FROM ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
           "refId": "A",
-          "format": 1
+          "format": "time_series"
         }
       ],
       "title": "$symbol 1-Min OHLCV",
       "type": "candlestick"
     },
     {
-      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+      "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "fixed", "fixedColor": "yellow"},
@@ -52,17 +52,17 @@
       },
       "targets": [
         {
-          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-          "rawSql": "SELECT window_start AS time, vwap FROM binance.ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
+          "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
+          "rawSql": "SELECT window_start AS time, vwap FROM ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
           "refId": "A",
-          "format": 1
+          "format": "time_series"
         }
       ],
       "title": "VWAP (All Exchanges)",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+      "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
       "fieldConfig": {
         "defaults": {
           "custom": {"fillOpacity": 80, "lineWidth": 1},
@@ -96,17 +96,17 @@
       },
       "targets": [
         {
-          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-          "rawSql": "SELECT window_start AS time, buy_volume, sell_volume FROM binance.ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
+          "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
+          "rawSql": "SELECT window_start AS time, buy_volume, sell_volume FROM ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
           "refId": "A",
-          "format": 1
+          "format": "time_series"
         }
       ],
       "title": "Buy vs Sell Volume",
       "type": "barchart"
     },
     {
-      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+      "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
       "fieldConfig": {
         "defaults": {"custom": {"lineWidth": 2, "fillOpacity": 0}, "unit": "currencyUSD"},
         "overrides": [
@@ -128,17 +128,17 @@
       },
       "targets": [
         {
-          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-          "rawSql": "SELECT window_start AS time, close, ema10 FROM binance.ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
+          "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
+          "rawSql": "SELECT window_start AS time, close, ema10 FROM ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
           "refId": "A",
-          "format": 1
+          "format": "time_series"
         }
       ],
       "title": "Close Price vs EMA-10",
       "type": "timeseries"
     },
     {
-      "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
+      "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "fixed", "fixedColor": "purple"},
@@ -157,10 +157,10 @@
       },
       "targets": [
         {
-          "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-          "rawSql": "SELECT window_start AS time, (buy_volume - sell_volume) / (buy_volume + sell_volume) AS imbalance FROM binance.ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND (buy_volume + sell_volume) > 0 AND $__timeFilter(window_start) ORDER BY window_start",
+          "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
+          "rawSql": "SELECT window_start AS time, (buy_volume - sell_volume) / NULLIF(buy_volume + sell_volume, 0) AS imbalance FROM ohlcv WHERE source = 'ALL' AND symbol = '$symbol' AND $__timeFilter(window_start) ORDER BY window_start",
           "refId": "A",
-          "format": 1
+          "format": "time_series"
         }
       ],
       "title": "Buy/Sell Imbalance  (+1 = all buys  ·  −1 = all sells)",
@@ -174,15 +174,15 @@
     "list": [
       {
         "current": {},
-        "datasource": {"type": "grafana-clickhouse-datasource", "uid": "clickhouse-crypto"},
-        "definition": "SELECT DISTINCT symbol FROM binance.ohlcv ORDER BY symbol",
+        "datasource": {"type": "postgres", "uid": "timescaledb-crypto"},
+        "definition": "SELECT DISTINCT symbol FROM ohlcv ORDER BY symbol",
         "hide": 0,
         "includeAll": false,
         "label": "Symbol",
         "multi": false,
         "name": "symbol",
         "options": [],
-        "query": "SELECT DISTINCT symbol FROM binance.ohlcv ORDER BY symbol",
+        "query": "SELECT DISTINCT symbol FROM ohlcv ORDER BY symbol",
         "refresh": 2,
         "sort": 1,
         "type": "query"

@@ -98,24 +98,26 @@ services:
         condition: service_started
       kafka-setup:
         condition: service_completed_successfully
-      clickhouse:
+      timescaledb:
         condition: service_healthy
     env_file: .env
     restart: on-failure
 
   # ── Storage ────────────────────────────────────────────────────────────────
 
-  clickhouse:
-    image: clickhouse/clickhouse-server:24.3
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
     ports:
-      - "8123:8123"
-      - "9000:9000"
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: binance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     volumes:
-      - ./clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./clickhouse/users.xml:/etc/clickhouse-server/users.d/network-fix.xml
-      - clickhouse-data:/var/lib/clickhouse
+      - ./timescaledb/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - timescaledb-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d binance"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -147,14 +149,29 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - clickhouse
+      - timescaledb
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_INSTALL_PLUGINS: grafana-clickhouse-datasource
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - grafana-data:/var/lib/grafana
 
+  pgadmin:
+    image: dpage/pgadmin4:9
+    profiles: [monitoring]
+    ports:
+      - "5050:80"
+    depends_on:
+      - timescaledb
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+      - pgadmin-data:/var/lib/pgadmin
+
 volumes:
-  clickhouse-data:
+  timescaledb-data:
   grafana-data:
+  pgadmin-data:

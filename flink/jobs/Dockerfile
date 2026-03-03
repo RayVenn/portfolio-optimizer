@@ -8,8 +8,8 @@ COPY gradle/ gradle/
 COPY settings.gradle build.gradle ./
 COPY flink/jobs/build.gradle flink/jobs/build.gradle
 COPY flink/jobs/src flink/jobs/src
-# settings.gradle includes producer; create the dir so Gradle 9 doesn't reject it
-RUN mkdir -p producer
+# settings.gradle includes producer and load-generator; create dirs so Gradle 9 doesn't reject them
+RUN mkdir -p producer load-generator
 
 RUN ./gradlew :flink-jobs:shadowJar --no-daemon
 

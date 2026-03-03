@@ -1,0 +1,16 @@
+apiVersion: 1
+datasources:
+  - name: TimescaleDB
+    uid: timescaledb-crypto
+    type: postgres
+    access: proxy
+    url: timescaledb:5432
+    database: binance
+    user: postgres
+    secureJsonData:
+      password: password
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
+      timescaledb: true
+    isDefault: true

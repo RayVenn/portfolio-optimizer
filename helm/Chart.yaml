@@ -1,0 +1,6 @@
+apiVersion: v2
+name: real-time-market-data
+description: Kafka, Flink, TimescaleDB and producer pipeline for real-time crypto market data
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

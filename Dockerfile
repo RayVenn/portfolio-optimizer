@@ -1,5 +1,5 @@
 # ── Stage 1: build fat JAR ────────────────────────────────────────────────────
-FROM eclipse-temurin:25-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN mkdir -p flink/jobs load-generator
 RUN ./gradlew :producer:jar --no-daemon
 
 # ── Stage 2: minimal JRE runtime ─────────────────────────────────────────────
-FROM eclipse-temurin:25-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 

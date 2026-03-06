@@ -1,0 +1,55 @@
+namespace: market-data
+
+images:
+  kafka: confluentinc/cp-kafka:7.6.0
+  flink: flink:1.19.1-java17
+  timescaledb: timescale/timescaledb:latest-pg16
+  grafana: grafana/grafana:10.4.0
+  producer:
+    repository: real-time-producer
+    tag: latest
+    pullPolicy: IfNotPresent
+  flinkJobs:
+    repository: real-time-flink-jobs
+    tag: latest
+    pullPolicy: IfNotPresent
+
+kafka:
+  clusterId: MkU3OEVBNTcwNTJENDM2Qk
+  topics: "crypto-trades:3:86400000,crypto-trades-dlq:1:604800000,crypto-orderbook:3:3600000"
+  nodePort: 30092
+
+timescaledb:
+  database: binance
+  username: postgres
+  password: password
+  storage: 5Gi
+
+producer:
+  binance:
+    wsUrl: wss://data-stream.binance.vision/stream
+    symbols: BTCUSDT
+    depthStreams: btcusdt@depth20@100ms
+  coinbase:
+    wsUrl: wss://advanced-trade-ws.coinbase.com
+    symbols: BTC-USD
+    healthPort: "8082"
+  kraken:
+    wsUrl: wss://ws.kraken.com/v2
+    symbols: BTC/USD
+  kafka:
+    flushEvery: "100"
+    topic: crypto-trades
+    dlqTopic: crypto-trades-dlq
+    orderbookTopic: crypto-orderbook
+  reconnect:
+    delayS: "5"
+    maxDelayS: "60"
+
+flink:
+  taskSlots: 4
+
+grafana:
+  adminPassword: admin
+  storage: 1Gi
+  nodePort: 30300

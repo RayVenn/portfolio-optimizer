@@ -127,38 +127,3 @@ spec:
               else
                 flink run -d -m flink-jobmanager:8081 /opt/flink/usrlib/ohlcv-job.jar
               fi
----
-# ── Job submission: Trade stream pipeline ────────────────────────────────────
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: flink-trade-job
-  namespace: {{ .Values.namespace }}
-spec:
-  ttlSecondsAfterFinished: 120
-  template:
-    spec:
-      restartPolicy: OnFailure
-      initContainers:
-        - name: wait-for-jobmanager
-          image: busybox
-          command: [sh, -c, "until nc -z flink-jobmanager 8081; do echo waiting...; sleep 3; done"]
-        - name: wait-for-kafka
-          image: busybox
-          command: [sh, -c, "until nc -z kafka 29092; do echo waiting...; sleep 3; done"]
-        - name: wait-for-db
-          image: busybox
-          command: [sh, -c, "until nc -z timescaledb 5432; do echo waiting...; sleep 3; done"]
-      containers:
-        - name: submit
-          image: {{ .Values.images.flinkJobs.repository }}:{{ .Values.images.flinkJobs.tag }}
-          imagePullPolicy: {{ .Values.images.flinkJobs.pullPolicy }}
-          command:
-            - bash
-            - -c
-            - |
-              if flink list -m flink-jobmanager:8081 2>/dev/null | grep -q "trade-stream"; then
-                echo "trade-stream already running, skipping submission"
-              else
-                flink run -d -m flink-jobmanager:8081 /opt/flink/usrlib/trade-stream-job.jar
-              fi
